@@ -74,6 +74,8 @@
   .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#111;color:#fff;padding:12px 22px;border-radius:24px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:999;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
+  [data-key].editando{outline:2px dashed var(--teal);outline-offset:4px;background:rgba(13,122,95,.05);cursor:text;border-radius:4px;}
+
   @media (max-width:860px){
     .nav,.hero,.section,.pios-band,footer{padding-left:24px;padding-right:24px;}
     .cards3{grid-template-columns:1fr;}
@@ -96,37 +98,37 @@
 
 <div class="hero">
   <div class="hero-inner">
-    <div class="eyebrow">Bienvenidos a Genios Intelligence</div>
-    <h1>Donde el territorio encuentra la inteligencia aplicada.</h1>
-    <div class="hero-sub">Integramos método, datos e inteligencia artificial —con visión de gestión del cambio e innovación aplicada— para que la dirección política de campañas y gobiernos locales deje de improvisar.</div>
+    <div class="eyebrow" data-key="hero_eyebrow">Bienvenidos a Genios Intelligence</div>
+    <h1 data-key="hero_titulo">Donde el territorio encuentra la inteligencia aplicada.</h1>
+    <div class="hero-sub" data-key="hero_sub">Integramos método, datos e inteligencia artificial —con visión de gestión del cambio e innovación aplicada— para que la dirección política de campañas y gobiernos locales deje de improvisar.</div>
   </div>
 </div>
 
 <div class="section" id="metodo">
-  <div class="section-head">Nuestro enfoque</div>
-  <div class="section-desc">No inventamos una teoría nueva. Integramos lo mejor del conocimiento disponible en un método propio, aplicado a la dirección política local.</div>
+  <div class="section-head" data-key="metodo_titulo">Nuestro enfoque</div>
+  <div class="section-desc" data-key="metodo_desc">No inventamos una teoría nueva. Integramos lo mejor del conocimiento disponible en un método propio, aplicado a la dirección política local.</div>
   <div class="cards3">
     <div class="card">
       <div class="card-mark" style="background:linear-gradient(135deg,#111,#0d5a52);">◆</div>
-      <div class="card-title">El Método Genios</div>
-      <div class="card-desc">Una disciplina de administración inteligente: escuchar, integrar, decidir, actuar y aprender, en un ciclo que convierte la gestión del cambio en ventaja medible.</div>
+      <div class="card-title" data-key="card1_titulo">El Método Genios</div>
+      <div class="card-desc" data-key="card1_desc">Una disciplina de administración inteligente: escuchar, integrar, decidir, actuar y aprender, en un ciclo que convierte la gestión del cambio en ventaja medible.</div>
     </div>
     <div class="card">
       <div class="card-mark" style="background:linear-gradient(135deg,#333,#9c7a1f);">◆</div>
-      <div class="card-title">Academia de Inteligencia Política</div>
-      <div class="card-desc">Un espacio de formación y red entre pares, para candidatos, aspirantes y líderes políticos de cualquier lugar.</div>
+      <div class="card-title" data-key="card2_titulo">Academia de Inteligencia Política</div>
+      <div class="card-desc" data-key="card2_desc">Un espacio de formación y red entre pares, para candidatos, aspirantes y líderes políticos de cualquier lugar.</div>
     </div>
     <div class="card">
       <div class="card-mark" style="background:linear-gradient(135deg,#0d5a52,#111);">◆</div>
-      <div class="card-title">PIOS</div>
-      <div class="card-desc">La plataforma que ejecuta el método: cinco Centros de Inteligencia que convierten información dispersa en decisiones accionables.</div>
+      <div class="card-title" data-key="card3_titulo">PIOS</div>
+      <div class="card-desc" data-key="card3_desc">La plataforma que ejecuta el método: cinco Centros de Inteligencia que convierten información dispersa en decisiones accionables.</div>
     </div>
   </div>
 </div>
 
 <div class="section section-alt" id="academia">
-  <div class="section-head">Academia de Inteligencia Política</div>
-  <div class="section-desc">Formación, mentoría y red entre pares para quienes hacen o quieren hacer política de forma más inteligente. Regístrate y entérate de las próximas sesiones.</div>
+  <div class="section-head" data-key="academia_titulo">Academia de Inteligencia Política</div>
+  <div class="section-desc" data-key="academia_desc">Formación, mentoría y red entre pares para quienes hacen o quieren hacer política de forma más inteligente. Regístrate y entérate de las próximas sesiones.</div>
 
   <div class="academia-grid">
     <div class="form-box">
@@ -162,8 +164,8 @@
 
 <div class="pios-band" id="pios">
   <div>
-    <h2>PIOS</h2>
-    <p>La plataforma operativa que ejecuta el Método Genios dentro de una campaña real — Centros de Inteligencia, Memoria Política, y decisiones basadas en datos, no en corazonada.</p>
+    <h2 data-key="pios_titulo">PIOS</h2>
+    <p data-key="pios_desc">La plataforma operativa que ejecuta el Método Genios dentro de una campaña real — Centros de Inteligencia, Memoria Política, y decisiones basadas en datos, no en corazonada.</p>
   </div>
   <a class="pill-btn" href="https://pios-genios-intelligence.vercel.app" target="_blank">Ingresar a PIOS →</a>
 </div>
@@ -174,6 +176,11 @@
 </footer>
 
 <div class="toast" id="toast"></div>
+
+<div id="edit-controls" style="position:fixed;bottom:24px;right:24px;z-index:998;display:flex;gap:8px;">
+  <button id="btn-editar" onclick="toggleModoEdicion()" style="background:#111;color:#fff;border:none;padding:11px 20px;border-radius:24px;font-size:12.5px;font-weight:600;cursor:pointer;">✏️ Editar contenido</button>
+  <button id="btn-guardar-edicion" onclick="guardarEdiciones()" style="display:none;background:var(--teal);color:#fff;border:none;padding:11px 20px;border-radius:24px;font-size:12.5px;font-weight:600;cursor:pointer;">💾 Guardar cambios</button>
+</div>
 
 <script>
 const SUPABASE_URL = 'https://tlnkxqxkemigwvoerqep.supabase.co';
@@ -271,6 +278,63 @@ async function confirmarAsistencia(eventoId, btn){
 }
 
 cargarAgenda();
+
+// ---------- Contenido editable (como en giraweb) ----------
+async function cargarContenidoEditable(){
+  const { data, error } = await supabaseClient.from('contenido_editable').select('clave, contenido');
+  if(error || !data) return;
+
+  data.forEach(fila => {
+    const el = document.querySelector(`[data-key="${fila.clave}"]`);
+    if(el && fila.contenido) el.textContent = fila.contenido;
+  });
+}
+
+let modoEdicion = false;
+
+function toggleModoEdicion(){
+  if(!modoEdicion){
+    const clave = prompt('Escribe la clave de edición para activar el modo editar:');
+    if(clave !== 'genios2026'){
+      if(clave !== null) mostrarToast('Clave incorrecta.');
+      return;
+    }
+  }
+
+  modoEdicion = !modoEdicion;
+  document.querySelectorAll('[data-key]').forEach(el => {
+    el.contentEditable = modoEdicion;
+    el.classList.toggle('editando', modoEdicion);
+  });
+
+  document.getElementById('btn-editar').style.display = modoEdicion ? 'none' : 'inline-block';
+  document.getElementById('btn-guardar-edicion').style.display = modoEdicion ? 'inline-block' : 'none';
+
+  if(modoEdicion) mostrarToast('Modo edición activo — toca cualquier texto marcado y escribe encima.');
+}
+
+async function guardarEdiciones(){
+  const elementos = document.querySelectorAll('[data-key]');
+  const filas = Array.from(elementos).map(el => ({
+    clave: el.getAttribute('data-key'),
+    contenido: el.textContent.trim()
+  }));
+
+  const { error } = await supabaseClient.from('contenido_editable').upsert(filas, { onConflict: 'clave' });
+
+  if(error){
+    mostrarToast('No se pudo guardar: ' + error.message);
+    return;
+  }
+
+  modoEdicion = false;
+  elementos.forEach(el => { el.contentEditable = false; el.classList.remove('editando'); });
+  document.getElementById('btn-editar').style.display = 'inline-block';
+  document.getElementById('btn-guardar-edicion').style.display = 'none';
+  mostrarToast('Cambios guardados — ya se ven así para todos.');
+}
+
+cargarContenidoEditable();
 </script>
 </body>
 </html>
