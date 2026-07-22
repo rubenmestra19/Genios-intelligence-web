@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
   :root{
     --ink:#0d0d0d; --muted:#666; --line:#ececec; --alt-bg:#fafaf8;
@@ -178,8 +179,34 @@
 <div class="toast" id="toast"></div>
 
 <div id="edit-controls" style="position:fixed;bottom:24px;right:24px;z-index:998;display:flex;gap:8px;">
+  <button id="btn-panel-datos" onclick="abrirPanelDatos()" style="background:var(--navy);color:#fff;border:none;padding:11px 20px;border-radius:24px;font-size:12.5px;font-weight:600;cursor:pointer;">📊 Ver panel de datos</button>
   <button id="btn-editar" onclick="toggleModoEdicion()" style="background:#111;color:#fff;border:none;padding:11px 20px;border-radius:24px;font-size:12.5px;font-weight:600;cursor:pointer;">✏️ Editar contenido</button>
   <button id="btn-guardar-edicion" onclick="guardarEdiciones()" style="display:none;background:var(--teal);color:#fff;border:none;padding:11px 20px;border-radius:24px;font-size:12.5px;font-weight:600;cursor:pointer;">💾 Guardar cambios</button>
+</div>
+
+<div id="panel-datos-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;padding:40px 20px;overflow-y:auto;">
+  <div style="background:#fff;max-width:900px;margin:0 auto;border-radius:14px;padding:32px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+      <h2 style="font-size:22px;">Panel de datos — Academia</h2>
+      <button onclick="cerrarPanelDatos()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);">✕</button>
+    </div>
+
+    <div style="margin-bottom:32px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h3 style="font-size:16px;">Interesados registrados</h3>
+        <button onclick="descargarInteresados()" style="background:var(--alt-bg);border:1px solid var(--line);padding:8px 16px;border-radius:8px;font-size:12.5px;cursor:pointer;">⬇ Descargar Excel</button>
+      </div>
+      <div id="tabla-interesados" style="max-height:280px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;font-size:12.5px;"></div>
+    </div>
+
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h3 style="font-size:16px;">Asistencias confirmadas</h3>
+        <button onclick="descargarAsistencias()" style="background:var(--alt-bg);border:1px solid var(--line);padding:8px 16px;border-radius:8px;font-size:12.5px;cursor:pointer;">⬇ Descargar Excel</button>
+      </div>
+      <div id="tabla-asistencias" style="max-height:280px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;font-size:12.5px;"></div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -335,6 +362,112 @@ async function guardarEdiciones(){
 }
 
 cargarContenidoEditable();
+
+// ---------- Panel de datos (protegido) ----------
+let panelDatosDesbloqueado = false;
+let cacheInteresados = [];
+let cacheAsistencias = [];
+
+async function abrirPanelDatos(){
+  if(!panelDatosDesbloqueado){
+    const clave = prompt('Escribe la clave para ver el panel de datos:');
+    if(clave !== 'genios2026'){
+      if(clave !== null) mostrarToast('Clave incorrecta.');
+      return;
+    }
+    panelDatosDesbloqueado = true;
+  }
+
+  document.getElementById('panel-datos-overlay').style.display = 'block';
+  await cargarTablaInteresados();
+  await cargarTablaAsistencias();
+}
+
+function cerrarPanelDatos(){
+  document.getElementById('panel-datos-overlay').style.display = 'none';
+}
+
+async function cargarTablaInteresados(){
+  const { data, error } = await supabaseClient
+    .from('interesados_academia')
+    .select('*')
+    .order('fecha_registro', { ascending: false });
+
+  const cont = document.getElementById('tabla-interesados');
+  if(error){ cont.innerHTML = `<div style="padding:12px;color:#b23b30;">${error.message}</div>`; return; }
+
+  cacheInteresados = data || [];
+  if(cacheInteresados.length === 0){
+    cont.innerHTML = '<div style="padding:12px;color:var(--muted);">Aún no hay nadie registrado.</div>';
+    return;
+  }
+
+  cont.innerHTML = `<table style="width:100%;border-collapse:collapse;">
+    <tr style="background:var(--alt-bg);text-align:left;">
+      <th style="padding:8px;">Nombre</th><th style="padding:8px;">Correo</th><th style="padding:8px;">Teléfono</th><th style="padding:8px;">Ciudad</th><th style="padding:8px;">Rol</th>
+    </tr>
+    ${cacheInteresados.map(p => `
+    <tr style="border-top:1px solid var(--line);">
+      <td style="padding:8px;">${p.nombre||''}</td>
+      <td style="padding:8px;">${p.correo||''}</td>
+      <td style="padding:8px;">${p.telefono||''}</td>
+      <td style="padding:8px;">${p.ciudad_region||''}</td>
+      <td style="padding:8px;">${p.rol||''}</td>
+    </tr>`).join('')}
+  </table>`;
+}
+
+async function cargarTablaAsistencias(){
+  const { data, error } = await supabaseClient
+    .from('asistencias_academia')
+    .select('fecha_confirmacion, interesados_academia(nombre, correo), eventos_academia(titulo, fecha)')
+    .order('fecha_confirmacion', { ascending: false });
+
+  const cont = document.getElementById('tabla-asistencias');
+  if(error){ cont.innerHTML = `<div style="padding:12px;color:#b23b30;">${error.message}</div>`; return; }
+
+  cacheAsistencias = (data || []).map(a => ({
+    nombre: a.interesados_academia?.nombre || '',
+    correo: a.interesados_academia?.correo || '',
+    evento: a.eventos_academia?.titulo || '',
+    fecha_evento: a.eventos_academia?.fecha || '',
+    fecha_confirmacion: a.fecha_confirmacion
+  }));
+
+  if(cacheAsistencias.length === 0){
+    cont.innerHTML = '<div style="padding:12px;color:var(--muted);">Aún no hay asistencias confirmadas.</div>';
+    return;
+  }
+
+  cont.innerHTML = `<table style="width:100%;border-collapse:collapse;">
+    <tr style="background:var(--alt-bg);text-align:left;">
+      <th style="padding:8px;">Nombre</th><th style="padding:8px;">Correo</th><th style="padding:8px;">Evento</th><th style="padding:8px;">Confirmó el</th>
+    </tr>
+    ${cacheAsistencias.map(a => `
+    <tr style="border-top:1px solid var(--line);">
+      <td style="padding:8px;">${a.nombre}</td>
+      <td style="padding:8px;">${a.correo}</td>
+      <td style="padding:8px;">${a.evento}</td>
+      <td style="padding:8px;">${a.fecha_confirmacion ? new Date(a.fecha_confirmacion).toLocaleDateString('es-CO') : ''}</td>
+    </tr>`).join('')}
+  </table>`;
+}
+
+function descargarInteresados(){
+  if(cacheInteresados.length === 0){ mostrarToast('No hay datos para descargar.'); return; }
+  const hoja = XLSX.utils.json_to_sheet(cacheInteresados);
+  const libro = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(libro, hoja, 'Interesados');
+  XLSX.writeFile(libro, `interesados_academia_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+function descargarAsistencias(){
+  if(cacheAsistencias.length === 0){ mostrarToast('No hay datos para descargar.'); return; }
+  const hoja = XLSX.utils.json_to_sheet(cacheAsistencias);
+  const libro = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(libro, hoja, 'Asistencias');
+  XLSX.writeFile(libro, `asistencias_academia_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
 </script>
 </body>
 </html>
