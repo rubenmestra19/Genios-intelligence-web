@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Genios Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+  :root{
+    --ink:#0d0d0d; --muted:#666; --line:#ececec; --alt-bg:#fafaf8;
+    --navy:#0a2540; --teal:#0d7a5f; --gold:#9c7a1f;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:'Inter',sans-serif;overflow-x:hidden;}
+  h1,h2,h3{font-family:'Fraunces',serif;margin:0;}
+  ::selection{background:var(--gold);color:#fff;}
+
+  .nav{display:flex;justify-content:space-between;align-items:center;padding:26px 56px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:10;}
+  .logo{font-weight:700;font-size:14.5px;letter-spacing:.3px;}
+  .logo span{font-weight:400;color:var(--muted);}
+  .nav-links{display:flex;gap:28px;align-items:center;font-size:13.5px;}
+  .nav-links a{color:var(--ink);text-decoration:none;cursor:pointer;}
+  .nav-links a:hover{color:var(--teal);}
+  .pill-btn{background:#111;color:#fff;padding:10px 22px;border-radius:24px;font-size:13px;font-weight:600;cursor:pointer;border:none;text-decoration:none;display:inline-block;transition:.15s;}
+  .pill-btn:hover{background:#333;}
+
+  .hero{padding:110px 56px 90px 56px;border-bottom:1px solid var(--line);}
+  .hero-inner{max-width:780px;}
+  .eyebrow{color:var(--muted);font-size:14px;margin-bottom:14px;}
+  .hero h1{font-size:clamp(34px,5.2vw,58px);font-weight:700;letter-spacing:-1.1px;line-height:1.07;margin-bottom:24px;}
+  .hero-sub{color:#4a4a4a;font-size:17.5px;line-height:1.6;max-width:600px;}
+
+  .section{padding:70px 56px;border-bottom:1px solid var(--line);}
+  .section-alt{background:var(--alt-bg);}
+  .section-head{font-size:24px;font-weight:700;margin-bottom:12px;letter-spacing:-.3px;}
+  .section-desc{color:var(--muted);font-size:14.5px;max-width:600px;margin-bottom:36px;line-height:1.6;}
+
+  .cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
+  .card{text-align:left;padding:6px;}
+  .card-mark{width:44px;height:44px;border-radius:10px;margin-bottom:18px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;}
+  .card-title{font-size:18px;font-weight:700;margin-bottom:8px;}
+  .card-desc{font-size:13.5px;color:var(--muted);line-height:1.6;}
+
+  /* Academia */
+  .academia-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:40px;align-items:start;}
+  .form-box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:28px;}
+  .form-box input,.form-box select{width:100%;background:var(--alt-bg);border:1px solid var(--line);border-radius:8px;padding:11px 14px;font-size:13.5px;font-family:'Inter',sans-serif;margin-bottom:10px;}
+  .form-box button{width:100%;background:var(--navy);color:#fff;border:none;padding:13px;border-radius:8px;font-weight:600;font-size:13.5px;cursor:pointer;transition:.15s;}
+  .form-box button:hover{background:#123a5e;}
+  .form-note{font-size:11.5px;color:var(--muted);margin-top:10px;}
+  .confirm-box{display:none;text-align:center;padding:24px;}
+  .confirm-box .check{font-size:34px;margin-bottom:12px;}
+
+  .agenda-list{display:flex;flex-direction:column;gap:14px;}
+  .evento-card{border:1px solid var(--line);border-radius:12px;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;}
+  .evento-fecha{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--teal);margin-bottom:6px;}
+  .evento-titulo{font-size:15px;font-weight:700;margin-bottom:4px;}
+  .evento-desc{font-size:12.5px;color:var(--muted);}
+  .btn-asistir{background:var(--alt-bg);border:1px solid var(--line);color:var(--ink);padding:9px 18px;border-radius:20px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:.15s;}
+  .btn-asistir:hover{background:var(--navy);color:#fff;border-color:var(--navy);}
+  .btn-asistir.confirmado{background:var(--teal);color:#fff;border-color:var(--teal);cursor:default;}
+
+  /* PIOS teaser */
+  .pios-band{background:var(--navy);color:#fff;padding:60px 56px;display:flex;justify-content:space-between;align-items:center;gap:30px;flex-wrap:wrap;}
+  .pios-band h2{color:#fff;font-size:26px;margin-bottom:10px;}
+  .pios-band p{color:#c9d4dd;font-size:14px;max-width:480px;line-height:1.6;}
+  .pios-band .pill-btn{background:#fff;color:var(--navy);}
+  .pios-band .pill-btn:hover{background:#e8e8e8;}
+
+  footer{padding:36px 56px;display:flex;justify-content:space-between;color:var(--muted);font-size:12.5px;flex-wrap:wrap;gap:10px;}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#111;color:#fff;padding:12px 22px;border-radius:24px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:999;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  @media (max-width:860px){
+    .nav,.hero,.section,.pios-band,footer{padding-left:24px;padding-right:24px;}
+    .cards3{grid-template-columns:1fr;}
+    .academia-grid{grid-template-columns:1fr;}
+    .nav-links{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="logo">GENIOS <span>INTELLIGENCE</span></div>
+  <div class="nav-links">
+    <a onclick="document.getElementById('metodo').scrollIntoView({behavior:'smooth'})">Método</a>
+    <a onclick="document.getElementById('academia').scrollIntoView({behavior:'smooth'})">Academia</a>
+    <a onclick="document.getElementById('pios').scrollIntoView({behavior:'smooth'})">PIOS</a>
+  </div>
+  <a class="pill-btn" href="https://pios-genios-intelligence.vercel.app" target="_blank">Ingresar</a>
+</div>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow">Bienvenidos a Genios Intelligence</div>
+    <h1>Donde el territorio encuentra la inteligencia aplicada.</h1>
+    <div class="hero-sub">Integramos método, datos e inteligencia artificial —con visión de gestión del cambio e innovación aplicada— para que la dirección política de campañas y gobiernos locales deje de improvisar.</div>
+  </div>
+</div>
+
+<div class="section" id="metodo">
+  <div class="section-head">Nuestro enfoque</div>
+  <div class="section-desc">No inventamos una teoría nueva. Integramos lo mejor del conocimiento disponible en un método propio, aplicado a la dirección política local.</div>
+  <div class="cards3">
+    <div class="card">
+      <div class="card-mark" style="background:linear-gradient(135deg,#111,#0d5a52);">◆</div>
+      <div class="card-title">El Método Genios</div>
+      <div class="card-desc">Una disciplina de administración inteligente: escuchar, integrar, decidir, actuar y aprender, en un ciclo que convierte la gestión del cambio en ventaja medible.</div>
+    </div>
+    <div class="card">
+      <div class="card-mark" style="background:linear-gradient(135deg,#333,#9c7a1f);">◆</div>
+      <div class="card-title">Academia de Inteligencia Política</div>
+      <div class="card-desc">Un espacio de formación y red entre pares, para candidatos, aspirantes y líderes políticos de cualquier lugar.</div>
+    </div>
+    <div class="card">
+      <div class="card-mark" style="background:linear-gradient(135deg,#0d5a52,#111);">◆</div>
+      <div class="card-title">PIOS</div>
+      <div class="card-desc">La plataforma que ejecuta el método: cinco Centros de Inteligencia que convierten información dispersa en decisiones accionables.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section section-alt" id="academia">
+  <div class="section-head">Academia de Inteligencia Política</div>
+  <div class="section-desc">Formación, mentoría y red entre pares para quienes hacen o quieren hacer política de forma más inteligente. Regístrate y entérate de las próximas sesiones.</div>
+
+  <div class="academia-grid">
+    <div class="form-box">
+      <div id="form-registro">
+        <input type="text" id="ac-nombre" placeholder="Nombre completo">
+        <input type="email" id="ac-correo" placeholder="Correo electrónico">
+        <input type="tel" id="ac-telefono" placeholder="Teléfono">
+        <input type="text" id="ac-ciudad" placeholder="Ciudad / Región">
+        <select id="ac-rol">
+          <option value="interesado">Interesado en aprender</option>
+          <option value="aspirante">Aspirante a un cargo</option>
+          <option value="candidato">Candidato o electo</option>
+          <option value="mentor">Quiero ser mentor</option>
+        </select>
+        <button onclick="registrarInteresado()">Quiero ser parte</button>
+        <div class="form-note">Tus datos solo se usan para invitarte a sesiones de la Academia — nunca se comparten.</div>
+      </div>
+      <div class="confirm-box" id="confirm-box">
+        <div class="check">🤝</div>
+        <div style="font-weight:700;font-size:16px;margin-bottom:6px;">¡Ya eres parte!</div>
+        <div style="color:var(--muted);font-size:13.5px;">Te avisaremos de las próximas sesiones. Mira la agenda al lado.</div>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-weight:700;font-size:14px;margin-bottom:14px;">Próximas sesiones</div>
+      <div class="agenda-list" id="agenda-list">
+        <div style="color:var(--muted);font-size:13px;">Cargando agenda...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pios-band" id="pios">
+  <div>
+    <h2>PIOS</h2>
+    <p>La plataforma operativa que ejecuta el Método Genios dentro de una campaña real — Centros de Inteligencia, Memoria Política, y decisiones basadas en datos, no en corazonada.</p>
+  </div>
+  <a class="pill-btn" href="https://pios-genios-intelligence.vercel.app" target="_blank">Ingresar a PIOS →</a>
+</div>
+
+<footer>
+  <div>Genios Intelligence — Turbo, Antioquia</div>
+  <div>© 2026</div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://tlnkxqxkemigwvoerqep.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_wKe3sA4Jswa9WlDXqTx6tw_fZKW9K91';
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let interesadoActualId = null;
+
+function mostrarToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(()=>t.classList.remove('show'), 4000);
+}
+
+async function registrarInteresado(){
+  const nombre = document.getElementById('ac-nombre').value.trim();
+  const correo = document.getElementById('ac-correo').value.trim();
+  const telefono = document.getElementById('ac-telefono').value.trim();
+  const ciudad = document.getElementById('ac-ciudad').value.trim();
+  const rol = document.getElementById('ac-rol').value;
+
+  if(!nombre || !correo){
+    mostrarToast('Completa al menos nombre y correo.');
+    return;
+  }
+
+  const { data, error } = await supabaseClient.from('interesados_academia').insert({
+    nombre, correo, telefono, ciudad_region: ciudad, rol
+  }).select().single();
+
+  if(error){
+    mostrarToast('No se pudo registrar: ' + error.message);
+    return;
+  }
+
+  interesadoActualId = data.id;
+  document.getElementById('form-registro').style.display = 'none';
+  document.getElementById('confirm-box').style.display = 'block';
+  mostrarToast('¡Bienvenido a la Academia!');
+  cargarAgenda();
+}
+
+async function cargarAgenda(){
+  const cont = document.getElementById('agenda-list');
+  const { data, error } = await supabaseClient
+    .from('eventos_academia')
+    .select('*')
+    .order('fecha', { ascending: true });
+
+  if(error){
+    cont.innerHTML = `<span style="color:#b23b30;font-size:13px;">${error.message}</span>`;
+    return;
+  }
+
+  if(!data || data.length === 0){
+    cont.innerHTML = '<div style="color:var(--muted);font-size:13px;">Aún no hay sesiones programadas — vuelve pronto.</div>';
+    return;
+  }
+
+  cont.innerHTML = data.map(ev => {
+    const fecha = ev.fecha ? new Date(ev.fecha).toLocaleDateString('es-CO', {day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit'}) : 'Fecha por confirmar';
+    return `
+    <div class="evento-card">
+      <div>
+        <div class="evento-fecha">${fecha} · ${ev.modalidad || ''}</div>
+        <div class="evento-titulo">${ev.titulo}</div>
+        <div class="evento-desc">${ev.descripcion || ''}</div>
+      </div>
+      <button class="btn-asistir" id="btn-asistir-${ev.id}" onclick="confirmarAsistencia('${ev.id}', this)">Asistir</button>
+    </div>`;
+  }).join('');
+}
+
+async function confirmarAsistencia(eventoId, btn){
+  if(!interesadoActualId){
+    mostrarToast('Regístrate primero arriba para confirmar asistencia.');
+    document.getElementById('form-registro').scrollIntoView({behavior:'smooth'});
+    return;
+  }
+
+  const { error } = await supabaseClient.from('asistencias_academia').insert({
+    evento_id: eventoId, interesado_id: interesadoActualId
+  });
+
+  if(error){
+    mostrarToast('No se pudo confirmar: ' + error.message);
+    return;
+  }
+
+  btn.textContent = '✓ Asististe';
+  btn.classList.add('confirmado');
+  mostrarToast('Asistencia confirmada.');
+}
+
+cargarAgenda();
+</script>
+</body>
+</html>
